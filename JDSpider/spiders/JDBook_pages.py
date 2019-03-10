@@ -10,7 +10,7 @@ class JdbookSpider(scrapy.Spider):
     name = 'pages'
     allowed_domains = ['book.jd.com','list.jd.com','c0.3.cn', 'item.jd.com']
     start_urls = ['http://book.jd.com/booksort.html']
-
+    r = Redis(host='192.168.31.229', password='1234', port=6379) 
 
     # 分析商品分类页面
     def parse(self, response):
@@ -35,12 +35,12 @@ class JdbookSpider(scrapy.Spider):
         
     # 分析商品列表页面
     def parse_books_list(self, response):
-        r = Redis(host='192.168.31.229', password='1234', port=6379)  
+
         # 翻页
         next_page_link = 'https://list.jd.com' + response.xpath("//a[@class='pn-next']/@href").extract_first() if response.xpath("//a[@class='pn-next']/@href").extract_first() else None
         print(next_page_link)
-        r.lpush("bookpages:page_urls", next_page_link)
         if next_page_link:
+            JdbookSpider.r.lpush("bookpages:page_urls", next_page_link)
             yield scrapy.Request(
                 next_page_link,
                 callback=self.parse_books_list,

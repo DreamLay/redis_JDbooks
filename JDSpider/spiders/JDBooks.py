@@ -38,6 +38,7 @@ class JdbookSpider(RedisSpider):
         item['cat'] = response.meta['cat']
         item['skuId'] = response.meta['skuId']
         item['title'] = response.xpath("//div[@class='item ellipsis']/text()").extract_first()
+        print(item['title'])
         lis = response.xpath("//div[@class='p-parameter']/ul/li")
         item['publish'],item['ISBN'],item['edition'],item['brand'],item['series_name'],item['publish_date'] = "","","","","",""
         for li in lis:
@@ -64,6 +65,6 @@ class JdbookSpider(RedisSpider):
         item['stockDesc'] = re.findall("<strong>(.*?)</strong>",info['stock']['stockDesc'])[0]
         item['current_price'] = info['stock']['jdPrice']['op'] if 'jdPrice' in info['stock'] else ""
         item['original_price'] = info['stock']['jdPrice']['m'] if 'jdPrice' in info['stock'] else ""
-        print(item)
+        # print(item)
         yield item
 
