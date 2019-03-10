@@ -3,7 +3,7 @@ import scrapy
 import json
 import time
 import re
-from JDSpider.items import JdspiderItem
+from redis import *
 
 
 class JdbookSpider(scrapy.Spider):
@@ -12,15 +12,8 @@ class JdbookSpider(scrapy.Spider):
     start_urls = ['http://book.jd.com/booksort.html']
 
 
-    def start_requests(self):
-        yield scrapy.Request(
-            'http://book.jd.com/booksort.html',
-            callback=self.parse_category
-        )
-
-
     # 分析商品分类页面
-    def parse_category(self, response):
+    def parse(self, response):
         dts = response.xpath("//div[@class='mc']//dt")
         dds = response.xpath("//div[@class='mc']//dd")
         for i in range(len(dts)):
@@ -34,8 +27,7 @@ class JdbookSpider(scrapy.Spider):
                 yield scrapy.Request(
                     child_url,
                     callback=self.parse_books_list,
-                    meta={"father_category": father_name, "category": child_name},
-                    dont_filter=False
+                    dont_filter=True
                 )
                 break
             break
@@ -43,13 +35,14 @@ class JdbookSpider(scrapy.Spider):
         
     # 分析商品列表页面
     def parse_books_list(self, response):
-        father_name, child_name = response.meta['father_category'],response.meta['category']
+        r = Redis(host='192.168.31.229', password='1234', port=6379)  
         # 翻页
         next_page_link = 'https://list.jd.com' + response.xpath("//a[@class='pn-next']/@href").extract_first() if response.xpath("//a[@class='pn-next']/@href").extract_first() else None
         print(next_page_link)
+        r.lpush("bookpages:page_urls", next_page_link)
         if next_page_link:
             yield scrapy.Request(
                 next_page_link,
                 callback=self.parse_books_list,
-                meta={"father_category": father_name, "category": child_name}
+                dont_filter=True
             )

@@ -17,17 +17,18 @@ SCHEDULER = "scrapy_redis.scheduler.Scheduler"  # 调度器
 SCHEDULER_PERSIST = True
 
 ITEM_PIPELINES = {
-   'JDSpider.pipelines.JdspiderPipeline': 300,
+#    'JDSpider.pipelines.JdspiderPipeline': 300,
+    'scrapy_redis.pipelines.RedisPipeline': 300,
 }
 
-MYSQL = {
-    'host': '127.0.0.1',
-    'port': 3306,
-    'user': 'root',
-    'passwd': '1234',
-    'db': 'jdstore',
-    'charset': 'utf8'
-}
+# MYSQL = {
+#     'host': '127.0.0.1',
+#     'port': 3306,
+#     'user': 'root',
+#     'passwd': '1234',
+#     'db': 'jdstore',
+#     'charset': 'utf8'
+# }
 
 REDIS_HOST = "192.168.31.229"
 REDIS_PORT = "6379"
